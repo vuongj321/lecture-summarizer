@@ -72,6 +72,38 @@ async def ask_question(body: Question):
     answer = response["output"]["message"]["content"][0]["text"]
     return {"answer": answer}
 
+@app.post("/summarize")
+async def summarize():
+    if not stored_file:
+        raise HTTPException(status_code=400, detail="No file uploaded yet")
+    
+    response = bedrock.converse(
+        modelId="us.amazon.nova-2-lite-v1:0",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "document": {
+                            "format": "pdf",
+                            "name": "lecture-notes",
+                            "source": {"bytes": stored_file["data"]}
+                        }
+                    },
+                    {"text": "Summarize this document in sections and bullet points"}
+                ]
+            }
+        ],
+        inferenceConfig={"maxTokens": 1000, "temperature": 0.3}
+    )
+
+    answer = response["output"]["message"]["content"][0]["text"]
+
+    print(answer)
+    
+    return {"answer": answer}
+
+
 @app.post("/test-nova")
 async def test_nova(question: Question):
     response = bedrock.invoke_model(
