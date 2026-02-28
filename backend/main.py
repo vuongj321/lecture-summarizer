@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import boto3
 
@@ -29,6 +30,13 @@ class Question(BaseModel):
     text: str
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # React app's address
+    allow_methods=["*"],   # allow GET, POST, etc.
+    allow_headers=["*"],   # allow all headers
+)
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -103,6 +111,11 @@ async def summarize():
     
     return {"answer": answer}
 
+@app.get("/")
+async def hello():
+    return {
+        "message": "hello world"
+    }
 
 @app.post("/test-nova")
 async def test_nova(question: Question):
