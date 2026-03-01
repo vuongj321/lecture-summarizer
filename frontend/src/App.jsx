@@ -65,35 +65,48 @@ function App() {
   };
 
   return (
-    <div>
-      <input type="file" accept=".pdf" onChange={handleUpload} />
-      {uploaded && <p>File uploaded successfully!</p>}
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b p-4">
+        <h1 className="text-xl font-bold">LectureAI</h1>
+      </div>
 
-      {messages.map((message, index) => (
-        <div key={index}>
-          <strong>{message.role === "user" ? "You" : "Assistant"}</strong>
-          <p>{message.text}</p>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left — PDF Viewer */}
+        <div className="w-1/2 border-r bg-white p-4 overflow-y-auto">
+          <input type="file" accept=".pdf" onChange={handleUpload} />
+          {uploaded && <p>File uploaded successfully!</p>}
         </div>
-      ))}
 
-      {error && <p>{error}</p>}
+        {/* Right — Chat */}
+        <div className="w-1/2 flex flex-col p-4">
+          {messages.map((message, index) => (
+            <div key={index}>
+              <strong>{message.role === "user" ? "You" : "Assistant"}</strong>
+              <p>{message.text}</p>
+            </div>
+          ))}
 
-      {uploaded && (
-        <div>
-          <input
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAsk()}
-            placeholder="Type your question"
-          />
-          <button onClick={handleAsk} disabled={loading}>
-            {loading === "ask" ? "Thinking..." : "Ask"}
-          </button>
-          <button onClick={handleSummarize} disabled={loading}>
-            {loading === "summarize" ? "Thinking..." : "Summarize"}
-          </button>
+          {error && <p>{error}</p>}
+
+          {uploaded && (
+            <div>
+              <input
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAsk()}
+                placeholder="Type your question"
+              />
+              <button onClick={handleAsk} disabled={loading}>
+                {loading === "ask" ? "Thinking..." : "Ask"}
+              </button>
+              <button onClick={handleSummarize} disabled={loading}>
+                {loading === "summarize" ? "Thinking..." : "Summarize"}
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
