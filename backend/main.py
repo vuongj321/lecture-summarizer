@@ -105,11 +105,9 @@ async def summarize():
         inferenceConfig={"maxTokens": 1000, "temperature": 0.3}
     )
 
-    answer = response["output"]["message"]["content"][0]["text"]
-
-    print(answer)
+    summary = response["output"]["message"]["content"][0]["text"]
     
-    return {"answer": answer}
+    return {"summary": summary}
 
 @app.get("/")
 async def hello():

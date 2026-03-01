@@ -6,8 +6,8 @@ const API = "http://localhost:8000";
 function App() {
   const [uploaded, setUploaded] = useState(false);
   const [question, setQuestion] = useState("");
-  const [response, setResponse] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState("");
   const [error, setError] = useState("");
 
   const handleUpload = async (e) => {
@@ -27,17 +27,40 @@ function App() {
   };
 
   const handleAsk = async () => {
-    setLoading(true);
+    if (!question.trim()) return;
+    setLoading("ask");
     setError("");
 
     try {
       const res = await axios.post(`${API}/ask`, { text: question });
-      setResponse(res.data.answer);
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", text: question },
+        { role: "assistant", text: res.data.answer },
+      ]);
       setQuestion("");
     } catch (err) {
       setError(err.response?.data?.detail || "Something went wrong.");
     } finally {
-      setLoading(false);
+      setLoading("");
+    }
+  };
+
+  const handleSummarize = async () => {
+    setLoading("summarize");
+    setError("");
+
+    try {
+      const res = await axios.post(`${API}/summarize`);
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", text: "Summarize the document" },
+        { role: "assistant", text: res.data.summary },
+      ]);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Something went wrong.");
+    } finally {
+      setLoading("");
     }
   };
 
@@ -46,21 +69,31 @@ function App() {
       <input type="file" accept=".pdf" onChange={handleUpload} />
       {uploaded && <p>File uploaded successfully!</p>}
 
+      {messages.map((message, index) => (
+        <div key={index}>
+          <strong>{message.role === "user" ? "You" : "Assistant"}</strong>
+          <p>{message.text}</p>
+        </div>
+      ))}
+
+      {error && <p>{error}</p>}
+
       {uploaded && (
         <div>
           <input
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAsk()}
             placeholder="Type your question"
           />
           <button onClick={handleAsk} disabled={loading}>
-            {loading ? "Thinking..." : "Ask"}
+            {loading === "ask" ? "Thinking..." : "Ask"}
+          </button>
+          <button onClick={handleSummarize} disabled={loading}>
+            {loading === "summarize" ? "Thinking..." : "Summarize"}
           </button>
         </div>
       )}
-
-      {error && <p>{error}</p>}
-      {response && <p>{response}</p>}
     </div>
   );
 }
