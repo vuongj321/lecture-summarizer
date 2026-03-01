@@ -4,7 +4,6 @@ import axios from "axios";
 const API = "http://localhost:8000";
 
 function App() {
-  const [file, setFile] = useState(null);
   const [uploaded, setUploaded] = useState(false);
   const [question, setQuestion] = useState("");
   const [response, setResponse] = useState("");
@@ -13,15 +12,14 @@ function App() {
 
   const handleUpload = async (e) => {
     const selectedFile = e.target.files[0];
-    setFile(selectedFile);
     setUploaded(false);
+    setError("");
 
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const res = await axios.post(`${API}/upload`, formData);
-      console.log(res.data);
+      await axios.post(`${API}/upload`, formData);
       setUploaded(true);
     } catch {
       setError("File upload failed");
@@ -48,7 +46,7 @@ function App() {
       <input type="file" accept=".pdf" onChange={handleUpload} />
       {uploaded && <p>File uploaded successfully!</p>}
 
-      {file && (
+      {uploaded && (
         <div>
           <input
             value={question}
