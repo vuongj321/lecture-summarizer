@@ -5,19 +5,27 @@ const API = "http://localhost:8000";
 
 function App() {
   const [file, setFile] = useState(null);
+  const [uploaded, setUploaded] = useState(false);
   const [question, setQuestion] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleUpload = async (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setUploaded(false);
 
-    const formData = new FormData();
-    formData.append("file", file);
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
 
-    const res = await axios.post(`${API}/upload`, formData);
-    console.log(res.data);
+      const res = await axios.post(`${API}/upload`, formData);
+      console.log(res.data);
+      setUploaded(true);
+    } catch {
+      setError("File upload failed");
+    }
   };
 
   const handleAsk = async () => {
@@ -27,8 +35,9 @@ function App() {
     try {
       const res = await axios.post(`${API}/ask`, { text: question });
       setResponse(res.data.answer);
+      setQuestion("");
     } catch (err) {
-      setError("Something went wrong");
+      setError(err.response?.data?.detail || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -37,10 +46,12 @@ function App() {
   return (
     <div>
       <input type="file" accept=".pdf" onChange={handleUpload} />
+      {uploaded && <p>File uploaded successfully!</p>}
 
       {file && (
         <div>
           <input
+            value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Type your question"
           />
