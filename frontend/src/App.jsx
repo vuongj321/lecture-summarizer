@@ -5,6 +5,7 @@ const API = "http://localhost:8000";
 
 function App() {
   const [uploaded, setUploaded] = useState(false);
+  const [fileURL, setFileURL] = useState(null);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState("");
@@ -12,6 +13,7 @@ function App() {
 
   const handleUpload = async (e) => {
     const selectedFile = e.target.files[0];
+    setFileURL(URL.createObjectURL(selectedFile));
     setUploaded(false);
     setError("");
 
@@ -67,7 +69,7 @@ function App() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b p-4">
+      <div className="bg-white border-b p-4 shadow-sm">
         <h1 className="text-xl font-bold">LectureAI</h1>
       </div>
 
@@ -76,10 +78,22 @@ function App() {
         <div className="w-1/2 border-r bg-white p-4 overflow-y-auto">
           <input type="file" accept=".pdf" onChange={handleUpload} />
           {uploaded && <p>File uploaded successfully!</p>}
+
+          {fileURL ? (
+            <iframe
+              src={fileURL}
+              className="flex-1 w-full h-screen"
+              title="Lecture PDF"
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-gray-400">
+              <p>Upload a PDF to get started</p>
+            </div>
+          )}
         </div>
 
         {/* Right — Chat */}
-        <div className="w-1/2 flex flex-col p-4">
+        <div className="w-1/2 flex flex-col p-4 overflow-y-auto">
           {messages.map((message, index) => (
             <div key={index}>
               <strong>{message.role === "user" ? "You" : "Assistant"}</strong>
