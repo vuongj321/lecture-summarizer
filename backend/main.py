@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 import boto3
 
@@ -14,6 +15,12 @@ load_dotenv()
 aws_key = os.getenv("AWS_ACCESS_KEY_ID")
 aws_secret = os.getenv("AWS_SECRET_ACCESS_KEY")
 aws_region = os.getenv("AWS_REGION")
+
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+def verify_key(key: str = Security(api_key_header)):
+    if key != os.getenv("APP_API_KEY"):
+        raise HTTPException(status_code=403, detail="Unauthorized")
 
 ALLOWED_TYPES = ["application/pdf"]
 
@@ -39,7 +46,8 @@ app.add_middleware(
 )
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), key: str = Security(api_key_header)):
+    verify_key(key)
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=400, detail="File type not allowed")
     
@@ -53,7 +61,8 @@ async def upload_file(file: UploadFile = File(...)):
     }
 
 @app.post("/ask")
-async def ask_question(body: Question):
+async def ask_question(body: Question, key: str = Security(api_key_header)):
+    verify_key(key)
     if not stored_file:
         raise HTTPException(status_code=400, detail="No file uploaded yet")
 
@@ -81,7 +90,8 @@ async def ask_question(body: Question):
     return {"answer": answer}
 
 @app.post("/summarize")
-async def summarize():
+async def summarize(key: str = Security(api_key_header)):
+    verify_key(key)
     if not stored_file:
         raise HTTPException(status_code=400, detail="No file uploaded yet")
     
@@ -108,30 +118,3 @@ async def summarize():
     summary = response["output"]["message"]["content"][0]["text"]
     
     return {"summary": summary}
-
-@app.get("/")
-async def hello():
-    return {
-        "message": "hello world"
-    }
-
-@app.post("/test-nova")
-async def test_nova(question: Question):
-    response = bedrock.invoke_model(
-        modelId = "us.amazon.nova-2-lite-v1:0",
-        body=json.dumps({
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [{"text": question.text}]
-                }
-            ],
-            "inferenceConfig": {"maxTokens": 200}
-        })
-    )
-
-    result = json.loads(response["body"].read())
-
-    answer = result["output"]["message"]["content"][0]["text"]
-    return {"answer": answer}
-

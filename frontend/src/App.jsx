@@ -3,6 +3,8 @@ import axios from "axios";
 import ReactMarkdown from "react-markdown";
 
 const API = "http://localhost:8000";
+const API_KEY =
+  "0dbd9af5eca4509966f0ee055a43a046a100e68d8ea525cffff0067e98c68f68";
 
 function App() {
   const [uploaded, setUploaded] = useState(false);
@@ -28,7 +30,9 @@ function App() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      await axios.post(`${API}/upload`, formData);
+      await axios.post(`${API}/upload`, formData, {
+        headers: { "X-API-Key": API_KEY },
+      });
       setFileURL(URL.createObjectURL(selectedFile));
       setUploaded(true);
     } catch {
@@ -42,7 +46,13 @@ function App() {
     setError("");
 
     try {
-      const res = await axios.post(`${API}/ask`, { text: question });
+      const res = await axios.post(
+        `${API}/ask`,
+        { text: question },
+        {
+          headers: { "X-API-Key": API_KEY },
+        },
+      );
       setMessages((prev) => [
         ...prev,
         { role: "user", text: question },
@@ -61,7 +71,13 @@ function App() {
     setError("");
 
     try {
-      const res = await axios.post(`${API}/summarize`);
+      const res = await axios.post(
+        `${API}/summarize`,
+        {},
+        {
+          headers: { "X-API-Key": API_KEY },
+        },
+      );
       setMessages((prev) => [
         ...prev,
         { role: "user", text: "Summarize the document" },
