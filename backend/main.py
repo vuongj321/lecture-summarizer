@@ -57,7 +57,7 @@ async def upload_file(file: UploadFile = File(...), key: str = Security(api_key_
     stored_file["name"] = file.filename
 
     return {
-        "message": f"{stored_file["name"]} successfully uploaded!"
+        "message": f"{stored_file['name']} successfully uploaded!"
     }
 
 @app.post("/ask")
