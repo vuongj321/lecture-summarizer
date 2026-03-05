@@ -40,7 +40,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # React app's address
+    allow_origins=["http://localhost:5173", "https://lecture-summarizer-blond.vercel.app/"],  # React app's address
     allow_methods=["*"],   # allow GET, POST, etc.
     allow_headers=["*"],   # allow all headers
 )

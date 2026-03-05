@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL;
 const API_KEY =
   "0dbd9af5eca4509966f0ee055a43a046a100e68d8ea525cffff0067e98c68f68";
 
