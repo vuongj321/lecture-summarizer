@@ -7,9 +7,6 @@ import boto3
 from dotenv import load_dotenv
 import os
 
-import json
-import base64
-
 load_dotenv()
 
 aws_key = os.getenv("AWS_ACCESS_KEY_ID")
@@ -40,7 +37,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://lecture-summarizer-blond.vercel.app/"],  # React app's address
+    allow_origins=["http://localhost:5173", "https://lecture-summarizer-blond.vercel.app"],  # React app's address
     allow_methods=["*"],   # allow GET, POST, etc.
     allow_headers=["*"],   # allow all headers
 )
