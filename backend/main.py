@@ -5,6 +5,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import chat, documents
 
+from database import engine
+from sqlalchemy import text
+from database import Base, engine
+from models import User, Document, Message
+
 app = FastAPI()
 
 app.add_middleware(
@@ -16,3 +21,7 @@ app.add_middleware(
 
 app.include_router(chat.router)
 app.include_router(documents.router)
+
+@app.get("/tables")
+def list_tables():
+    return {"tables": list(Base.metadata.tables.keys())}
