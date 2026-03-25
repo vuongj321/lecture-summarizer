@@ -1,16 +1,16 @@
-from fastapi import APIRouter, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException
 
+from models import User
 from services.nova import ask_nova, summarize_nova
 from schemas.chat import Question
 
-from dependencies import verify_key, api_key_header
+from dependencies import get_current_user
 from state import stored_file
 
 router = APIRouter()
 
 @router.post("/ask")
-async def ask_question(body: Question, key: str = Security(api_key_header)):
-    verify_key(key)
+async def ask_question(body: Question, current_user: User = Depends(get_current_user)):
     if not stored_file:
         raise HTTPException(status_code=400, detail="No file uploaded yet")
 
@@ -19,8 +19,7 @@ async def ask_question(body: Question, key: str = Security(api_key_header)):
     return {"answer": answer}
 
 @router.post("/summarize")
-async def summarize(key: str = Security(api_key_header)):
-    verify_key(key)
+async def summarize(current_user: User = Depends(get_current_user)):
     if not stored_file:
         raise HTTPException(status_code=400, detail="No file uploaded yet")
 

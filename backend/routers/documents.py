@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Security
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 
-from dependencies import verify_key, api_key_header
+from dependencies import get_current_user
 from state import stored_file, ALLOWED_TYPES
+from models import User
 
 router = APIRouter()
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), key: str = Security(api_key_header)):
-    verify_key(key)
+async def upload_file(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=400, detail="File type not allowed")
     
