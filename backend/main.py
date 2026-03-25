@@ -5,9 +5,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import chat, documents, auth
 
-from database import engine
-from sqlalchemy import text
-from database import Base, engine
 from models import User, Document, Message
 
 app = FastAPI()
