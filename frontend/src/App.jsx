@@ -141,11 +141,11 @@ function App() {
                           : "max-w-prose bg-gray-100 text-gray-800 prose prose-sm"
                       }`}
                     >
-                      <div ref={bottomRef} />
                       <ReactMarkdown>{message.text}</ReactMarkdown>
                     </div>
                   </div>
                 ))}
+                <div ref={bottomRef} />
               </div>
 
               {error && (

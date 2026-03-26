@@ -11,6 +11,32 @@ bedrock = boto3.client(
     aws_secret_access_key = aws_secret
 )
 
+def ask_nova_stream(file_bytes: bytes, question: str):
+    response = bedrock.converse_stream(
+        modelId="us.amazon.nova-2-lite-v1:0",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "document": {
+                        "format": "pdf", 
+                        "name": "lecture-notes", 
+                        "source": {"bytes": file_bytes}
+                        }
+                    },
+                    {"text": question}
+                ]
+            }
+        ],
+        inferenceConfig={"maxTokens": 1000, "temperature": 0.3}
+    )
+    # Iterate through stream events
+    for event in response["stream"]:
+        # Check if event is text
+        if "contentBlockDelta" in event:
+            yield event["contentBlockDelta"]["delta"]["text"]
+
 def ask_nova(file_bytes: bytes, question: str) -> str:
     response = bedrock.converse(
         modelId="us.amazon.nova-2-lite-v1:0",
