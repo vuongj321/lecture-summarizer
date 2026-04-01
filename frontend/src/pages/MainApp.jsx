@@ -1,9 +1,10 @@
 import { useRef, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api";
 import ReactMarkdown from "react-markdown";
 
 function MainApp() {
+  const [searchParams] = useSearchParams();
   const [documentId, setDocumentId] = useState(null);
   const [uploaded, setUploaded] = useState(false);
   const [fileURL, setFileURL] = useState(null);
@@ -19,6 +20,14 @@ function MainApp() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const idFromUrl = searchParams.get("document_id");
+
+    if (idFromUrl) {
+      loadDocument(parseInt(idFromUrl));
+    }
+  }, [searchParams]);
+
   const handleUpload = async (e) => {
     const selectedFile = e.target.files[0];
     setUploaded(false);
@@ -31,11 +40,43 @@ function MainApp() {
       formData.append("file", selectedFile);
 
       const res = await api.post(`/upload`, formData);
+      const newDocumentId = res.data.document_id;
+
       setFileURL(URL.createObjectURL(selectedFile));
-      setDocumentId(res.data.document_id);
+      setDocumentId(newDocumentId);
       setUploaded(true);
+
+      // load any previous messages for this document
+      const historyRes = await api.get(`/documents/${newDocumentId}/messages`);
+      setMessages(
+        historyRes.data.messages.map((m) => ({
+          role: m.role,
+          text: m.content,
+        })),
+      );
     } catch {
       setError("File upload failed");
+    }
+  };
+
+  const loadDocument = async (id) => {
+    try {
+      setDocumentId(id);
+
+      // fetch document metadata including pre-signed URL
+      const docRes = await api.get(`/documents/${id}`);
+      setFileURL(docRes.data.url); // S3 pre-signed URL goes straight into iframe
+      setUploaded(true);
+
+      // fetch chat history
+      const historyRes = await api.get(`/documents/${id}/messages`);
+      const previousMessages = historyRes.data.messages.map((m) => ({
+        role: m.role,
+        text: m.content,
+      }));
+      setMessages(previousMessages);
+    } catch {
+      setError("Failed to load document");
     }
   };
 
@@ -97,22 +138,6 @@ function MainApp() {
     } finally {
       setLoading("");
     }
-    // try {
-    //   const res = await api.post(`/ask`, {
-    //     text: question,
-    //     document_id: documentId,
-    //   });
-    //   setMessages((prev) => [
-    //     ...prev,
-    //     { role: "user", text: question },
-    //     { role: "assistant", text: res.data.answer },
-    //   ]);
-    //   setQuestion("");
-    // } catch (err) {
-    //   setError(err.response?.data?.detail || "Something went wrong.");
-    // } finally {
-    //   setLoading("");
-    // }
   };
 
   const handleSummarize = async () => {
@@ -157,6 +182,12 @@ function MainApp() {
               className="hidden"
             />
           </label>
+          <button
+            onClick={() => navigate("/documents")}
+            className="text-sm text-gray-500 hover:text-gray-700"
+          >
+            My Lectures
+          </button>
           <button
             onClick={handleLogout}
             className="text-sm text-gray-500 hover:text-gray-700"

@@ -43,17 +43,6 @@ async def ask_question(body: Question, current_user: User = Depends(get_current_
         
     return StreamingResponse(generate(), media_type="text/event-stream")
 
-    #answer = ask_nova(file_bytes, body.text)
-
-    # Save messages to database
-    # user_message = Message(document_id = document.id, role = "user", content = body.text)
-    # assistant_message = Message(document_id = document.id, role = "assistant", content = answer)
-    # db.add(user_message)
-    # db.add(assistant_message)
-    # db.commit()
-
-    # return {"answer": answer}
-
 @router.post("/summarize")
 async def summarize(body: SummarizeRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Fetch document from database and verify it belongs to user

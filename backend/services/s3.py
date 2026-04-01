@@ -1,14 +1,17 @@
 import boto3
 import os
 
+from botocore.config import Config
+
 S3_BUCKET = os.getenv("S3_BUCKET_NAME")
 assert S3_BUCKET, "S3_BUCKET_NAME environment variable is not set"
 
 s3 = boto3.client(
     "s3",
-    region_name=os.getenv("AWS_REGION"),
+    region_name=os.getenv("S3_REGION"),
     aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    config=Config(signature_version="s3v4")
 )
 
 def upload_to_s3(file_bytes: bytes, user_id: int, filename: str) -> str:
@@ -27,3 +30,10 @@ def download_from_s3(key: str) -> bytes:
 
 def delete_from_s3(key: str) -> None:
     s3.delete_object(Bucket=S3_BUCKET, Key=key)
+
+def get_presigned_url(key: str, expiry_seconds: int = 3600) -> str:
+    return s3.generate_presigned_url(
+        "get_object", 
+        Params={"Bucket": S3_BUCKET, "Key": key},
+        ExpiresIn = expiry_seconds
+    )
