@@ -6,31 +6,50 @@ from services.s3 import upload_to_s3, get_presigned_url
 from dependencies import get_current_user
 from models import User, Document
 
-ALLOWED_TYPES = ["application/pdf"]
+import os
+import magic
+
+MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
 router = APIRouter()
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...), current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(status_code=400, detail="File type not allowed")
+    # Check content-length header
+    content_length = file.size
+    if content_length and content_length > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File too large. Maximum size is 20MB.")
     
     contents = await file.read()
 
+    # Check size since content-length can be spoofed
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File too large. Maximum size is 20MB.")
+    
+    # Magic bytes check
+    mime = magic.from_buffer(contents[:2048], mime=True)
+    if mime != "application/pdf":
+        raise HTTPException(status_code=400, detail="File must be a PDF.")
+    
     if not file.filename:
         raise HTTPException(status_code=400, detail="Filename is required")
+    
+    # Sanitize file name
+    safe_filename = os.path.basename(file.filename)
+    if not safe_filename:
+        raise HTTPException(status_code=400, detail="Invalid filename.")
 
     # Upload document to s3
-    s3_key = upload_to_s3(contents, current_user.id, file.filename)
+    s3_key = upload_to_s3(contents, current_user.id, safe_filename)
 
     # Save document metadata to database
-    document = Document(user_id = current_user.id, filename = file.filename, s3_key = s3_key)
+    document = Document(user_id = current_user.id, filename = safe_filename, s3_key = s3_key)
     db.add(document)
     db.commit()
     db.refresh(document)
 
     return {
-        "message": f"{file.filename} successfully uploaded!",
+        "message": f"{safe_filename} successfully uploaded!",
         "document_id": document.id
     }
 
