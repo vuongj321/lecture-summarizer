@@ -99,7 +99,6 @@ function MainApp() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "X-API-Key": import.meta.env.VITE_API_KEY,
         },
         body: JSON.stringify({
           text: currentQuestion,

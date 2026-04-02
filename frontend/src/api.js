@@ -6,10 +6,7 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  const apiKey = import.meta.env.VITE_API_KEY;
-
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  if (apiKey) config.headers["X-API-Key"] = apiKey;
 
   return config;
 });

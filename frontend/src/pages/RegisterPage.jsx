@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API = import.meta.env.VITE_API_URL;
-const API_KEY = import.meta.env.VITE_API_KEY;
 
 function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -27,11 +26,7 @@ function RegisterPage() {
     setError("");
 
     try {
-      const res = await axios.post(
-        `${API}/auth/register`,
-        { email, password },
-        { headers: { "X-API-Key": API_KEY } },
-      );
+      const res = await axios.post(`${API}/auth/register`, { email, password });
 
       localStorage.setItem("token", res.data.access_token);
       navigate("/");

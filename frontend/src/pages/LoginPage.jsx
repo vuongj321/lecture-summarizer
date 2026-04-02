@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API = import.meta.env.VITE_API_URL;
-const API_KEY = import.meta.env.VITE_API_KEY;
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,7 +23,6 @@ function LoginPage() {
 
       const res = await axios.post(`${API}/auth/login`, formData, {
         headers: {
-          "X-API-Key": API_KEY,
           "Content-Type": "application/x-www-form-urlencoded",
         },
       });

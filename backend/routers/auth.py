@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from limiter import limiter 
 from sqlalchemy.orm import Session
 from database import get_db
 from models import User
@@ -9,7 +10,8 @@ from services.auth import hash_password, verify_password, create_access_token
 router = APIRouter(prefix="/auth")
 
 @router.post("/register", response_model=TokenResponse)
-def register(body: RegisterRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/hour")
+def register(request: Request, body: RegisterRequest, db: Session = Depends(get_db)):
     if len(body.password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
     
@@ -31,7 +33,8 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
     return TokenResponse(access_token=create_access_token(user.id))
 
 @router.post("/login", response_model=TokenResponse)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     # form_data.username contains the email
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user:
