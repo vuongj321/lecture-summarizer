@@ -10,15 +10,14 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from typing import cast, Callable
 
-from models import User, Document, Message
-
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://lecture-summarizer-blond.vercel.app"],  # React app's address
-    allow_methods=["*"],   # allow GET, POST, etc.
-    allow_headers=["*"],   # allow all headers
+    allow_origins=["http://localhost:5173",                         # local development
+                   "https://lecture-summarizer-blond.vercel.app"],  # production
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 app.state.limiter = limiter
