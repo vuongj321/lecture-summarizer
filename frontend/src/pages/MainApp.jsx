@@ -22,11 +22,15 @@ function MainApp() {
 
   useEffect(() => {
     const idFromUrl = searchParams.get("document_id");
-
     if (idFromUrl) {
-      loadDocument(parseInt(idFromUrl));
+      const id = parseInt(idFromUrl);
+      if (isNaN(id)) {
+        navigate("/documents");
+        return;
+      }
+      loadDocument(id);
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   const handleUpload = async (e) => {
     const selectedFile = e.target.files[0];
@@ -88,7 +92,7 @@ function MainApp() {
     const currentQuestion = question;
     setMessages((prev) => [
       ...prev,
-      { role: "user", text: question },
+      { role: "user", text: currentQuestion },
       { role: "assistant", text: "" },
     ]);
     setQuestion("");
@@ -106,6 +110,14 @@ function MainApp() {
         }),
       });
 
+      // Check data before steaming
+      if (!res.ok) {
+        const err = await res.json();
+        setMessages((prev) => prev.slice(0, -1)); // remove empty assistant placeholder
+        setError(err.detail || "Something went wrong.");
+        return;
+      }
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
 
@@ -119,21 +131,26 @@ function MainApp() {
           const data = line.slice(6);
           if (data === "[DONE]") break;
 
-          const chunk = JSON.parse(data);
+          try {
+            const chunk = JSON.parse(data);
 
-          // append chunk to the last message in place
-          setMessages((prev) => {
-            const updated = [...prev];
-            updated[updated.length - 1] = {
-              ...updated[updated.length - 1],
-              text: updated[updated.length - 1].text + chunk,
-            };
-            return updated;
-          });
+            // append chunk to the last message in place
+            setMessages((prev) => {
+              const updated = [...prev];
+              updated[updated.length - 1] = {
+                ...updated[updated.length - 1],
+                text: updated[updated.length - 1].text + chunk,
+              };
+              return updated;
+            });
+          } catch {
+            console.error("Failed to parse SSE chunk:", data);
+          }
         }
       }
-    } catch (err) {
-      setError(err.response?.data?.detail || "Something went wrong.");
+    } catch {
+      setMessages((prev) => prev.slice(0, -1));
+      setError("Something went wrong.");
     } finally {
       setLoading("");
     }
