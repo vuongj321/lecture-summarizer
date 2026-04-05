@@ -7,7 +7,7 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = mapped_column(Integer, primary_key=True)
-    document_id = mapped_column(Integer, ForeignKey("documents.id"), nullable=False)
+    document_id = mapped_column(Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False)
     role = mapped_column(String, nullable=False)  # "user" or "assistant"
     content = mapped_column(Text, nullable=False)
     created_at = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))

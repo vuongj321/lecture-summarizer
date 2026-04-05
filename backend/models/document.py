@@ -13,4 +13,4 @@ class Document(Base):
     uploaded_at = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="documents")
-    messages = relationship("Message", back_populates="document")
+    messages = relationship("Message", back_populates="document", cascade="all, delete-orphan")
