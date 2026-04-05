@@ -43,7 +43,7 @@ async def upload_file(file: UploadFile = File(...), current_user: User = Depends
     s3_key = upload_to_s3(contents, current_user.id, safe_filename)
 
     # Save document metadata to database
-    document = Document(user_id = current_user.id, filename = safe_filename, s3_key = s3_key)
+    document = Document(user_id=current_user.id, filename=safe_filename, s3_key=s3_key)
     db.add(document)
     db.commit()
     db.refresh(document)
@@ -54,7 +54,7 @@ async def upload_file(file: UploadFile = File(...), current_user: User = Depends
     }
 
 @router.get("/documents")
-def get_documents(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_documents(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Fetch all documents belonging to current user
     documents = db.query(Document).filter(Document.user_id == current_user.id).all()
 
@@ -70,7 +70,7 @@ def get_documents(current_user: User = Depends(get_current_user), db: Session = 
     }
 
 @router.get("/documents/{document_id}")
-def get_document(document_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_document(document_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Fetch document matching user and document id
     document = db.query(Document).filter(
         Document.id == document_id,

@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 
 from models import User, Document, Message
 from services.s3 import download_from_s3
-from services.nova import ask_nova, summarize_nova, ask_nova_stream
+from services.nova import summarize_nova, ask_nova_stream
 from schemas.chat import Question, SummarizeRequest
 
 from dependencies import get_current_user
@@ -35,8 +35,8 @@ async def ask_question(body: Question, current_user: User = Depends(get_current_
 
         # Save text to database after streaming completes
         with SessionLocal() as session:
-            session.add(Message(document_id = document.id, role = "user", content = body.text))
-            session.add(Message(document_id = document.id, role = "assistant", content = "".join(full_response)))
+            session.add(Message(document_id=document.id, role="user", content=body.text))
+            session.add(Message(document_id=document.id, role="assistant", content="".join(full_response)))
             session.commit()
             
         yield "data: [DONE]\n\n"
@@ -57,8 +57,8 @@ async def summarize(body: SummarizeRequest, current_user: User = Depends(get_cur
     summary = summarize_nova(file_bytes)
 
     # Save messages to database
-    user_message = Message(document_id = document.id, role = "user", content = "Summarize the document")
-    assistant_message = Message(document_id = document.id, role = "assistant", content = summary)
+    user_message = Message(document_id=document.id, role="user", content="Summarize the document")
+    assistant_message = Message(document_id=document.id, role="assistant", content=summary)
     db.add(user_message)
     db.add(assistant_message)
     db.commit()
@@ -66,7 +66,7 @@ async def summarize(body: SummarizeRequest, current_user: User = Depends(get_cur
     return {"summary": summary}
 
 @router.get("/documents/{document_id}/messages")
-def get_messages(document_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_messages(document_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Fetch document from database
     document = db.query(Document).filter(Document.id == document_id, Document.user_id == current_user.id).first()
 

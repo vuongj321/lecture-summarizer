@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import api from "../api";
+import api, { getAuthHeaders } from "../api";
 import ReactMarkdown from "react-markdown";
 
 function MainApp() {
@@ -100,10 +100,7 @@ function MainApp() {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/ask`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           text: currentQuestion,
           document_id: documentId,

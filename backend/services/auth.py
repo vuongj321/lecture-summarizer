@@ -6,10 +6,10 @@ import os
 SECRET_KEY: str = os.getenv("SECRET_KEY") or ""
 assert SECRET_KEY, "SECRET_KEY environment variable is not set"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 def hash_password(password: str) -> bytes:
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))
 
 def verify_password(plain_password: str, hashed_password: bytes) -> bool:
     return bcrypt.checkpw(plain_password.encode(), hashed_password)
@@ -27,6 +27,9 @@ def decode_access_token(token: str) -> int | None:
         sub = payload.get("sub")
         if sub is None:
             return None
-        return int(sub)
+        try:
+            return int(sub)
+        except ValueError:
+            return None
     except JWTError:
         return None

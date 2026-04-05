@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -21,7 +21,7 @@ function LoginPage() {
       formData.append("username", email);
       formData.append("password", password);
 
-      const res = await axios.post(`${API}/auth/login`, formData, {
+      const res = await api.post(`/auth/login`, formData, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },

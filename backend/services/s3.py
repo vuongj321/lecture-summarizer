@@ -31,9 +31,10 @@ def download_from_s3(key: str) -> bytes:
 def delete_from_s3(key: str) -> None:
     s3.delete_object(Bucket=S3_BUCKET, Key=key)
 
-def get_presigned_url(key: str, expiry_seconds: int = 3600) -> str:
+def get_presigned_url(key: str) -> str:
+    expiry = int(os.getenv("PRESIGNED_URL_EXPIRY_SECONDS", "3600"))
     return s3.generate_presigned_url(
         "get_object", 
         Params={"Bucket": S3_BUCKET, "Key": key},
-        ExpiresIn = expiry_seconds
+        ExpiresIn=expiry
     )
