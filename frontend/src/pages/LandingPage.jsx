@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import "./LandingPage.css";
 import { FEATURES } from "../components/features";
+import {
+  MonkeyDefault,
+  MonkeyWaving,
+  MonkeyExcited,
+  MonkeyThinking,
+} from "../components/MonkeyMascot";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+/** Loose check aligned with typical user@domain.tld (server still validates with EmailStr). */
+function isValidWaitlistEmail(value) {
+  const s = value.trim();
+  if (!s || s.length > 254) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+}
 
 // ─── Small reusable components ────────────────────────────────────────────────
 function WaitlistForm() {
@@ -13,20 +26,32 @@ function WaitlistForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const emailInputRef = useRef(null);
 
   const handleSubmit = async () => {
-    if (!email || !email.includes("@")) {
+    const trimmed = email.trim();
+    if (!isValidWaitlistEmail(trimmed)) {
+      setError(true);
+      emailInputRef.current?.focus();
+      return;
+    }
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) {
       setError(true);
       return;
     }
     setLoading(true);
+    setError(false);
     try {
-      // TODO: replace with your deployed API URL once live
-      await fetch("/api/waitlist", {
+      const res = await fetch(`${apiUrl.replace(/\/$/, "")}/waitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: trimmed }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail ?? "Request failed");
+      }
       setSubmitted(true);
     } catch {
       setError(true);
@@ -39,38 +64,19 @@ function WaitlistForm() {
     return (
       <div
         style={{
-          display: "inline-flex",
+          display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          gap: 14,
-          background: "#fff",
-          border: "1px solid rgba(10,13,7,.12)",
-          borderRadius: 14,
-          padding: "18px 28px",
+          gap: 8,
         }}
       >
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            background: "#e6f1fb",
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 16,
-            flexShrink: 0,
-          }}
-        >
-          🎉
-        </div>
-        <div>
-          <strong style={{ display: "block", fontWeight: 600, fontSize: 15 }}>
-            You're on the list!
-          </strong>
-          <span style={{ fontSize: 13, color: "rgba(10,13,7,.5)" }}>
-            We'll email you when early access opens.
-          </span>
-        </div>
+        <MonkeyExcited size={120} />
+        <strong style={{ fontSize: 17, fontWeight: 600 }}>
+          You're on the list!
+        </strong>
+        <span style={{ fontSize: 14, color: "rgba(10,13,7,.5)" }}>
+          We'll email you when early access opens.
+        </span>
       </div>
     );
   }
@@ -86,7 +92,11 @@ function WaitlistForm() {
         }}
       >
         <input
+          ref={emailInputRef}
           type="email"
+          name="waitlist-email"
+          autoComplete="email"
+          inputMode="email"
           placeholder="Enter your email address"
           value={email}
           onChange={(e) => {
@@ -94,6 +104,8 @@ function WaitlistForm() {
             setError(false);
           }}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+          aria-invalid={error}
+          aria-describedby="waitlist-email-hint"
           style={{
             flex: 1,
             border: `1px solid ${error ? "#f87171" : "rgba(10,13,7,.2)"}`,
@@ -121,6 +133,7 @@ function WaitlistForm() {
         </button>
       </div>
       <p
+        id="waitlist-email-hint"
         style={{ fontSize: 12, color: "rgba(10,13,7,.4)", textAlign: "center" }}
       >
         No spam, ever. Unsubscribe anytime.
@@ -131,6 +144,9 @@ function WaitlistForm() {
 
 function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
+  const triggerId = useId();
+  const panelId = useId();
+
   return (
     <div
       style={{
@@ -140,15 +156,13 @@ function FaqItem({ q, a }) {
         overflow: "hidden",
       }}
     >
-      <div
+      <button
+        type="button"
+        id={triggerId}
+        className="mm-faq-trigger"
+        aria-expanded={open}
+        aria-controls={panelId}
         onClick={() => setOpen(!open)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          padding: "18px 24px",
-          cursor: "pointer",
-        }}
       >
         <span
           style={{
@@ -162,6 +176,7 @@ function FaqItem({ q, a }) {
           {q}
         </span>
         <span
+          aria-hidden
           style={{
             fontSize: 20,
             color: "#0a0d07",
@@ -172,19 +187,21 @@ function FaqItem({ q, a }) {
         >
           +
         </span>
+      </button>
+      <div
+        id={panelId}
+        role="region"
+        aria-labelledby={triggerId}
+        hidden={!open}
+        style={{
+          padding: "0 24px 18px",
+          fontSize: 14,
+          lineHeight: 1.6,
+          color: "#0a0d07",
+        }}
+      >
+        {a}
       </div>
-      {open && (
-        <div
-          style={{
-            padding: "0 24px 18px",
-            fontSize: 14,
-            lineHeight: 1.6,
-            color: "#0a0d07",
-          }}
-        >
-          {a}
-        </div>
-      )}
     </div>
   );
 }
@@ -192,10 +209,11 @@ function FaqItem({ q, a }) {
 // ─── Page sections ────────────────────────────────────────────────────────────
 function Nav() {
   return (
-    <div
+    <header
       style={{ position: "sticky", top: 0, zIndex: 100, padding: "12px 16px" }}
     >
-      <div
+      <nav
+        aria-label="Main navigation"
         style={{
           maxWidth: 1280,
           margin: "0 auto",
@@ -222,10 +240,11 @@ function Nav() {
             cursor: "pointer",
           }}
         >
-          <span style={{ fontSize: 20 }}>🐒</span> Monkey Mentor
+          <MonkeyDefault size={42} /> Monkey Mentor
         </div>
         <div
           className="mm-nav-links"
+          role="list"
           style={{
             display: "flex",
             alignItems: "center",
@@ -252,8 +271,8 @@ function Nav() {
         >
           Join Waitlist
         </button>
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 }
 
@@ -261,6 +280,7 @@ function Hero() {
   return (
     <section
       className="mm-hero"
+      aria-label="Hero"
       style={{
         position: "relative",
         minHeight: 700,
@@ -428,6 +448,15 @@ function Hero() {
         </div>
       </div>
       <div style={{ position: "relative", zIndex: 1, maxWidth: 700 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: 16,
+          }}
+        >
+          <MonkeyWaving size={260} />
+        </div>
         <h1
           style={{
             fontSize: 58,
@@ -528,6 +557,7 @@ function Waitlist() {
   return (
     <section
       id="waitlist"
+      aria-label="Join the waitlist"
       style={{ background: "#f9f9fb", padding: "60px 24px" }}
     >
       <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" }}>
@@ -602,53 +632,26 @@ function Demo() {
           style={{
             width: "100%",
             borderRadius: 16,
-            overflow: "hidden",
-            background: "linear-gradient(135deg,#2563eb,#7c3aed)",
+            background: "#eef2ff",
+            border: "1px solid #e0e7ff",
             aspectRatio: "16/9",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            gap: 12,
           }}
         >
-          <div
-            style={{
-              background: "rgba(255,255,255,.1)",
-              border: "1px solid rgba(255,255,255,.2)",
-              borderRadius: 12,
-              padding: "28px 40px",
-              textAlign: "center",
-              color: "#fff",
-            }}
+          <style>{`@keyframes mm-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }`}</style>
+          <MonkeyThinking
+            size={160}
+            style={{ animation: "mm-bob 2s ease-in-out infinite" }}
+          />
+          <p
+            style={{ fontSize: 15, color: "rgba(10,13,7,.5)", fontWeight: 500 }}
           >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                background: "rgba(255,255,255,.9)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 16px",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  width: 0,
-                  height: 0,
-                  borderTop: "10px solid transparent",
-                  borderBottom: "10px solid transparent",
-                  borderLeft: "18px solid #0a0d07",
-                  marginLeft: 4,
-                }}
-              />
-            </div>
-            <p style={{ fontSize: 15, opacity: 0.85 }}>
-              Upload a lecture PDF · Get instant summaries · Chat with your
-              notes
-            </p>
-          </div>
+            Demo video coming soon
+          </p>
         </div>
       </div>
     </section>
@@ -662,6 +665,7 @@ function Features() {
   return (
     <section
       id="features"
+      aria-label="Features"
       style={{ background: "#f9f9fb", padding: "60px 24px" }}
     >
       <div
@@ -864,7 +868,11 @@ function Pricing() {
   ];
 
   return (
-    <section id="pricing" style={{ background: "#fff", padding: "60px 24px" }}>
+    <section
+      id="pricing"
+      aria-label="Pricing"
+      style={{ background: "#fff", padding: "60px 24px" }}
+    >
       <div style={{ maxWidth: 880, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <p
@@ -1107,7 +1115,11 @@ function Faq() {
   ];
 
   return (
-    <section id="faq" style={{ background: "#f9f9fb", padding: "60px 24px" }}>
+    <section
+      id="faq"
+      aria-label="Frequently asked questions"
+      style={{ background: "#f9f9fb", padding: "60px 24px" }}
+    >
       <div
         className="mm-faq-wrap"
         style={{
@@ -1266,19 +1278,14 @@ function Footer() {
                 {title}
               </p>
               {links.map(({ label, action }) => (
-                <a
+                <button
                   key={label}
+                  type="button"
+                  className="mm-footer-link"
                   onClick={action}
-                  style={{
-                    display: "block",
-                    padding: "5px 0",
-                    fontSize: 13,
-                    opacity: 0.8,
-                    cursor: "pointer",
-                  }}
                 >
                   {label}
-                </a>
+                </button>
               ))}
             </div>
           ))}
@@ -1295,20 +1302,13 @@ function Footer() {
             gap: 16,
           }}
         >
-          <div
+          <button
+            type="button"
+            className="mm-footer-brand"
             onClick={scrollToTop}
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              letterSpacing: "-.03em",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              cursor: "pointer",
-            }}
           >
-            <span style={{ fontSize: 18 }}>🐒</span> Monkey Mentor
-          </div>
+            <MonkeyDefault size={26} /> Monkey Mentor
+          </button>
           <p style={{ fontSize: 13, color: "rgba(10,13,7,.6)" }}>
             © {new Date().getFullYear()} Monkey Mentor. Built for students.
           </p>
@@ -1323,13 +1323,16 @@ export default function LandingPage() {
   return (
     <div className="mm">
       <Nav />
-      <Hero />
-      <Stats />
-      <Waitlist />
-      <Features />
-      <ResearchStats />
-      <Pricing />
-      <Faq />
+      <main>
+        <Hero />
+        <Stats />
+        <Waitlist />
+        <Demo />
+        <Features />
+        <ResearchStats />
+        <Pricing />
+        <Faq />
+      </main>
       <Footer />
     </div>
   );

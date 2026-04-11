@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="28 34 144 152" fill="none">
+  <!-- ears -->
+  <ellipse cx="48" cy="103" rx="18" ry="20" fill="#A0693A"/>
+  <ellipse cx="48" cy="103" rx="11" ry="13" fill="#F2C28A"/>
+  <ellipse cx="152" cy="103" rx="18" ry="20" fill="#A0693A"/>
+  <ellipse cx="152" cy="103" rx="11" ry="13" fill="#F2C28A"/>
+  <!-- head -->
+  <circle cx="100" cy="105" r="58" fill="#7B4F2E"/>
+  <!-- fur highlight -->
+  <ellipse cx="86" cy="83" rx="20" ry="16" fill="#A0693A" opacity="0.4"/>
+  <!-- face patch -->
+  <ellipse cx="100" cy="115" rx="40" ry="38" fill="#F2C28A"/>
+  <ellipse cx="100" cy="127" rx="32" ry="18" fill="#E0A870" opacity="0.25"/>
+  <!-- eyes -->
+  <ellipse cx="83" cy="101" rx="13" ry="14" fill="#F8F4F0"/>
+  <circle cx="84" cy="102" r="8" fill="#2A1A0E"/>
+  <circle cx="87" cy="98" r="3" fill="#fff"/>
+  <ellipse cx="117" cy="101" rx="13" ry="14" fill="#F8F4F0"/>
+  <circle cx="118" cy="102" r="8" fill="#2A1A0E"/>
+  <circle cx="121" cy="98" r="3" fill="#fff"/>
+  <!-- blush -->
+  <ellipse cx="72" cy="113" rx="9" ry="6" fill="#F4A0A0" opacity="0.5"/>
+  <ellipse cx="128" cy="113" rx="9" ry="6" fill="#F4A0A0" opacity="0.5"/>
+  <!-- nose -->
+  <ellipse cx="100" cy="119" rx="8" ry="6" fill="#5C3418" opacity="0.7"/>
+  <!-- smile -->
+  <path d="M82,129 Q100,145 118,129" stroke="#5C3418" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+</svg>

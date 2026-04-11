@@ -49,6 +49,57 @@
   background: #f5f5f3;
 }
 
+/* ── Footer link-style buttons ── */
+.mm-footer-link {
+  display: block;
+  width: 100%;
+  padding: 5px 0;
+  font-size: 13px;
+  font-family: inherit;
+  color: inherit;
+  opacity: 0.8;
+  cursor: pointer;
+  text-align: left;
+  border: none;
+  background: transparent;
+}
+.mm-footer-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.mm-footer-brand {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+.mm-footer-brand:hover {
+  opacity: 0.85;
+}
+
+/* ── FAQ accordion trigger ── */
+.mm-faq-trigger {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 18px 24px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+}
+
 /* ── Nav ── */
 .mm-nav-link {
   color: #0a0d07;
