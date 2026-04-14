@@ -28,6 +28,10 @@ app.add_middleware(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, cast(Callable, _rate_limit_exceeded_handler))
 
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
+
 app.include_router(waitlist.router)
 
 _marketing_only = os.getenv("MARKETING_ONLY_API") == "true"

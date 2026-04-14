@@ -1,5 +1,5 @@
 from database import Base, engine
-from models import User, Document, Message
+from models import User, Document, Message, Waitlist_Entry
 
 from logging.config import fileConfig
 
