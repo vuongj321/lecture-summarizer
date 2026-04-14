@@ -603,56 +603,26 @@ function Waitlist() {
 function Demo() {
   return (
     <section style={{ background: "#fff", padding: "60px 24px" }}>
-      <div
-        style={{
-          maxWidth: 1280,
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 40,
-        }}
-      >
+      <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex",
+                    flexDirection: "column", alignItems: "center", gap: 40 }}>
         <div style={{ textAlign: "center", maxWidth: 680 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
-            Watch a Demo
-          </p>
-          <h2
-            style={{
-              fontSize: 42,
-              fontWeight: 500,
-              letterSpacing: "-1.4px",
-              lineHeight: 1.2,
-            }}
-          >
+          <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Watch a Demo</p>
+          <h2 style={{ fontSize: 42, fontWeight: 500, letterSpacing: "-1.4px", lineHeight: 1.2 }}>
             How your lectures become a complete study system
           </h2>
         </div>
-        <div
-          style={{
-            width: "100%",
-            borderRadius: 16,
-            background: "#eef2ff",
-            border: "1px solid #e0e7ff",
-            aspectRatio: "16/9",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
-          }}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          controls
+          preload="none"
+          poster="/demo_frame.png"
+          style={{ width: "100%", borderRadius: 16, display: "block" }}
         >
-          <style>{`@keyframes mm-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }`}</style>
-          <MonkeyThinking
-            size={160}
-            style={{ animation: "mm-bob 2s ease-in-out infinite" }}
-          />
-          <p
-            style={{ fontSize: 15, color: "rgba(10,13,7,.5)", fontWeight: 500 }}
-          >
-            Demo video coming soon
-          </p>
-        </div>
+          <source src="https://lecture-ai-files.s3.us-east-2.amazonaws.com/demo/0414.mp4" type="video/mp4" />
+        </video>
       </div>
     </section>
   );
