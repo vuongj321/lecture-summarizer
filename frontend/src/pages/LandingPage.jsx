@@ -5,7 +5,6 @@ import {
   MonkeyDefault,
   MonkeyWaving,
   MonkeyExcited,
-  MonkeyThinking,
 } from "../components/MonkeyMascot";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -489,70 +488,6 @@ function Hero() {
   );
 }
 
-function Stats() {
-  const items = [
-    ["2,400+", "Students already on the waitlist"],
-    ["92%", "of active users reported better grades"],
-  ];
-  return (
-    <section style={{ background: "#fff", padding: "56px 24px" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <h2
-          style={{
-            fontSize: 36,
-            fontWeight: 500,
-            letterSpacing: "-1.1px",
-            maxWidth: 620,
-            marginBottom: 48,
-            lineHeight: 1.25,
-          }}
-        >
-          The trusted AI study tool for students.
-        </h2>
-        <div
-          className="mm-stats-row"
-          style={{ display: "flex", marginBottom: 48 }}
-        >
-          {items.map(([num, desc], i) => (
-            <div
-              key={num}
-              style={{
-                flex: 1,
-                borderLeft: "1px solid rgba(10,13,7,.15)",
-                paddingLeft: 24,
-                marginLeft: i > 0 ? 48 : 0,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 72,
-                  fontWeight: 500,
-                  letterSpacing: "-2.5px",
-                  lineHeight: 1.2,
-                }}
-              >
-                {num}
-              </div>
-              <div style={{ fontSize: 17, marginTop: 4, lineHeight: 1.4 }}>
-                {desc}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <button
-            className="mm-btn-blue"
-            style={{ padding: "11px 28px", fontSize: 15 }}
-            onClick={() => scrollTo("waitlist")}
-          >
-            Join for Free
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Waitlist() {
   return (
     <section
@@ -743,84 +678,6 @@ function Features() {
   );
 }
 
-function ResearchStats() {
-  const stats = [
-    ["92%", "of active users reported grade improvements"],
-    ["85%", "of all users reported grade improvements"],
-    ["30%", "reduction in average study time reported"],
-  ];
-  return (
-    <section style={{ background: "#c5f1ec", padding: "60px 24px" }}>
-      <div
-        style={{
-          maxWidth: 1280,
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: 40,
-        }}
-      >
-        <div style={{ display: "flex", gap: 60, flexWrap: "wrap" }}>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-              Research
-            </p>
-            <h2
-              style={{
-                fontSize: 42,
-                fontWeight: 500,
-                letterSpacing: "-1.4px",
-                lineHeight: 1.2,
-              }}
-            >
-              Finals season put us to the test. We passed.
-            </h2>
-          </div>
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
-            <p style={{ fontSize: 14, lineHeight: 1.5 }}>
-              *Based on early testing with 500 students during finals week
-            </p>
-          </div>
-        </div>
-        <div className="mm-res-stats" style={{ display: "flex" }}>
-          {stats.map(([num, desc], i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                borderLeft: "1px solid rgba(10,13,7,.2)",
-                paddingLeft: 24,
-                marginLeft: i > 0 ? 48 : 0,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 64,
-                  fontWeight: 500,
-                  letterSpacing: "-2px",
-                  lineHeight: 1.2,
-                }}
-              >
-                {num}
-              </div>
-              <div style={{ fontSize: 17, lineHeight: 1.4, marginTop: 4 }}>
-                {desc}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Pricing() {
   const freeTier = [
     "3 lecture uploads/month",
@@ -1004,7 +861,7 @@ function Pricing() {
               <span
                 style={{ fontSize: 52, fontWeight: 500, letterSpacing: "-2px" }}
               >
-                $7
+                $6
               </span>
               <span style={{ fontSize: 14, color: "rgba(10,13,7,.4)" }}>
                 /month
@@ -1295,11 +1152,9 @@ export default function LandingPage() {
       <Nav />
       <main>
         <Hero />
-        <Stats />
         <Waitlist />
         <Demo />
         <Features />
-        <ResearchStats />
         <Pricing />
         <Faq />
       </main>
